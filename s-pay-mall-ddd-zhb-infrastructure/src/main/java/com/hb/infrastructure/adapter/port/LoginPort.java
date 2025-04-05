@@ -2,6 +2,7 @@ package com.hb.infrastructure.adapter.port;
 
 import com.google.common.cache.Cache;
 import com.hb.domain.auth.adapter.port.ILoginPort;
+import com.hb.infrastructure.adapter.repository.OrderRepository;
 import com.hb.infrastructure.gateway.IWeixinApiService;
 import com.hb.infrastructure.gateway.dto.WeixinQrCodeRequestDTO;
 import com.hb.infrastructure.gateway.dto.WeixinQrCodeResponseDTO;

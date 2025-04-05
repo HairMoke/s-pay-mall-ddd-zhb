@@ -3,6 +3,7 @@ package com.hb.infrastructure.adapter.repository;
 import com.hb.domain.order.adapter.repository.IOrderRepository;
 import com.hb.domain.order.model.aggregate.CreateOrderAggregate;
 import com.hb.domain.order.model.entity.OrderEntity;
+import com.hb.domain.order.model.entity.PayOrderEntity;
 import com.hb.domain.order.model.entity.ProductEntity;
 import com.hb.domain.order.model.entity.ShopCartEntity;
 import com.hb.domain.order.model.valobj.OrderStatusVO;
@@ -57,5 +58,16 @@ public class OrderRepository implements IOrderRepository {
         order.setStatus(orderEntity.getOrderStatusVO().getCode());
 
         orderDao.insert(order);
+    }
+
+    @Override
+    public void updateOrderPayInfo(PayOrderEntity payOrderEntity) {
+        PayOrder payOrderReq = PayOrder.builder()
+                .userId(payOrderEntity.getUserId())
+                .orderId(payOrderEntity.getOrderId())
+                .status(payOrderEntity.getOrderStatus().getCode())
+                .payUrl(payOrderEntity.getPayUrl())
+                .build();
+        orderDao.updateOrderPayInfo(payOrderReq);
     }
 }
