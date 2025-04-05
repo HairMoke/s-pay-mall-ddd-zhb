@@ -18,6 +18,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * 买家账号uniinx6179@sandbox.com
+ * 登录密码111111
+ * 支付密码111111
+ */
 @Slf4j
 @RestController
 @CrossOrigin("*")
@@ -107,6 +113,8 @@ public class AliPayController implements IPayService {
         log.info("支付回调，买家付款时间: {}", params.get("gmt_payment"));
         log.info("支付回调，买家付款金额: {}", params.get("buyer_pay_amount"));
         log.info("支付回调，支付回调，更新订单 {}", tradeNo);
+
+        orderService.changeOrderPaySuccess(tradeNo);
 
         return "success";
     }

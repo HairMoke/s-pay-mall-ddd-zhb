@@ -1,5 +1,8 @@
 package com.hb.infrastructure.adapter.repository;
 
+import com.alibaba.fastjson2.JSON;
+import com.google.common.eventbus.EventBus;
+import com.hb.domain.order.adapter.event.PaySuccessMessageEvent;
 import com.hb.domain.order.adapter.repository.IOrderRepository;
 import com.hb.domain.order.model.aggregate.CreateOrderAggregate;
 import com.hb.domain.order.model.entity.OrderEntity;
@@ -9,15 +12,25 @@ import com.hb.domain.order.model.entity.ShopCartEntity;
 import com.hb.domain.order.model.valobj.OrderStatusVO;
 import com.hb.infrastructure.dao.IOrderDao;
 import com.hb.infrastructure.dao.po.PayOrder;
+import com.hb.types.common.Constants;
+import com.hb.types.event.BaseEvent;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.List;
 
 @Repository
 public class OrderRepository implements IOrderRepository {
 
     @Resource
     private IOrderDao orderDao;
+
+    @Resource
+    private PaySuccessMessageEvent paySuccessMessageEvent;
+
+    @Resource
+    private EventBus eventBus;
 
     @Override
     public OrderEntity queryUnPayOrder(ShopCartEntity shopCartEntity) {
@@ -69,5 +82,35 @@ public class OrderRepository implements IOrderRepository {
                 .payUrl(payOrderEntity.getPayUrl())
                 .build();
         orderDao.updateOrderPayInfo(payOrderReq);
+    }
+
+    @Override
+    public void changeOrderPaySuccess(String orderId) {
+        PayOrder payOrderReq = new PayOrder();
+        payOrderReq.setOrderId(orderId);
+        payOrderReq.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
+        orderDao.changeOrderPaySuccess(payOrderReq);
+
+        BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(PaySuccessMessageEvent.PaySuccessMessage.builder()
+                .tradeNo(orderId)
+                .build());
+        PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
+
+        eventBus.post(paySuccessMessage);
+    }
+
+    @Override
+    public List<String> queryNoPayNotifyOrder() {
+        return orderDao.queryNoPayNotifyOrder();
+    }
+
+    @Override
+    public List<String> queryTimeoutCloseOrderList() {
+        return orderDao.queryTimeoutCloseOrderList();
+    }
+
+    @Override
+    public boolean changeOrderClose(String orderId) {
+        return orderDao.changeOrderClose(orderId);
     }
 }
